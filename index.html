@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#6c3483">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <title>Dieta</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #1a1a2e;
+      --primary: #6c3483;
+      --primary-light: #8e44ad;
+      --text: #e8e8e8;
+      --text-muted: #888;
+      --border: #2d2d44;
+      --danger: #c0392b;
+      --danger-glow: rgba(192, 57, 43, 0.4);
+      --primary-glow: rgba(108, 52, 131, 0.3);
+    }
+
+    body {
+      font-family: 'Raleway', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 100px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ─── Header ─── */
+    .header {
+      text-align: center;
+      padding: 28px 16px 20px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .header::after {
+      content: '✦ ─────── ✦ ─────── ✦';
+      display: block;
+      color: var(--primary);
+      font-size: 10px;
+      letter-spacing: 4px;
+      margin-top: 12px;
+      opacity: 0.6;
+    }
+    .header h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .header h1 span {
+      color: var(--primary-light);
+    }
+
+    /* ─── Counter Section ─── */
+    .counter-section {
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .counter-label {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .counter-value {
+      font-family: 'Cinzel', serif;
+      font-size: 48px;
+      font-weight: 700;
+      transition: color 0.3s;
+    }
+    .counter-value.ok { color: var(--primary-light); }
+    .counter-value.warn { color: var(--danger); }
+    .counter-value small {
+      font-size: 24px;
+      color: var(--text-muted);
+    }
+    .progress-bar {
+      width: 100%;
+      max-width: 300px;
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      margin: 16px auto 0;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.4s ease, background 0.3s;
+      background: var(--primary-light);
+    }
+    .progress-fill.warn {
+      background: var(--danger);
+      box-shadow: 0 0 10px var(--danger-glow);
+    }
+    .week-warning {
+      display: none;
+      margin-top: 12px;
+      padding: 8px 16px;
+      background: rgba(192, 57, 43, 0.15);
+      border: 1px solid rgba(192, 57, 43, 0.3);
+      border-radius: 8px;
+      color: var(--danger);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+    .week-warning.visible { display: inline-block; }
+
+    /* ─── Ornamental Divider ─── */
+    .divider {
+      text-align: center;
+      padding: 8px 0;
+      color: var(--primary);
+      font-size: 10px;
+      letter-spacing: 4px;
+      opacity: 0.5;
+    }
+
+    /* ─── Section Title ─── */
+    .section-title {
+      font-family: 'Cinzel', serif;
+      font-size: 14px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 16px 20px 8px;
+    }
+
+    /* ─── Flex Cards ─── */
+    .cards-container {
+      padding: 8px 16px;
+    }
+    .flex-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      position: relative;
+      animation: fadeIn 0.3s ease;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    }
+    .flex-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 2px 16px var(--primary-glow);
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .flex-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .flex-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .flex-badge.small { background: rgba(108, 52, 131, 0.2); color: #b88bd6; }
+    .flex-badge.medium { background: rgba(142, 68, 173, 0.25); color: #c89ee0; }
+    .flex-badge.large { background: rgba(192, 57, 43, 0.2); color: #e88a7f; }
+
+    .flex-card-actions {
+      display: flex;
+      gap: 4px;
+    }
+    .flex-card-actions button {
+      background: none;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    .flex-card-actions button:hover {
+      color: var(--text);
+      border-color: var(--border);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .flex-card-actions button.delete:hover {
+      color: var(--danger);
+      border-color: rgba(192, 57, 43, 0.3);
+    }
+    .flex-card-desc {
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .flex-card-date {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state .icon {
+      font-size: 40px;
+      margin-bottom: 12px;
+      opacity: 0.4;
+    }
+    .empty-state p {
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+
+    /* ─── History ─── */
+    .history-section { padding: 0 16px 20px; }
+    .history-week {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .history-week-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .history-week-header:hover { background: rgba(255, 255, 255, 0.03); }
+    .history-week-header .week-name {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      letter-spacing: 2px;
+    }
+    .history-week-header .week-count {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .history-week-header .chevron {
+      transition: transform 0.2s;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+    .history-week.open .chevron { transform: rotate(180deg); }
+    .history-week-body {
+      display: none;
+      padding: 0 16px 12px;
+    }
+    .history-week.open .history-week-body { display: block; }
+    .history-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 0;
+      border-top: 1px solid rgba(45, 45, 68, 0.5);
+      font-size: 13px;
+    }
+    .history-item .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .history-item .dot.small { background: #b88bd6; }
+    .history-item .dot.medium { background: #c89ee0; }
+    .history-item .dot.large { background: #e88a7f; }
+
+    /* ─── FAB ─── */
+    .fab {
+      position: fixed;
+      bottom: 28px;
+      right: 24px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px var(--primary-glow);
+      transition: all 0.2s;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .fab:hover, .fab:active {
+      background: var(--primary-light);
+      box-shadow: 0 4px 30px rgba(142, 68, 173, 0.5);
+      transform: scale(1.05);
+    }
+
+    /* ─── Modal ─── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 200;
+      align-items: flex-end;
+      justify-content: center;
+      animation: fadeIn 0.2s;
+    }
+    .modal-overlay.active { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 480px;
+      padding: 24px 20px 32px;
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .modal-title {
+      font-family: 'Cinzel', serif;
+      font-size: 18px;
+      letter-spacing: 3px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .modal-title::after {
+      content: '── ✦ ──';
+      display: block;
+      color: var(--primary);
+      font-size: 10px;
+      margin-top: 8px;
+      opacity: 0.5;
+    }
+
+    .size-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .size-btn {
+      flex: 1;
+      padding: 14px 8px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'Raleway', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      letter-spacing: 1px;
+    }
+    .size-btn .size-icon {
+      display: block;
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+    .size-btn:hover { border-color: var(--primary); color: var(--text); }
+    .size-btn.selected {
+      border-color: var(--primary-light);
+      background: rgba(108, 52, 131, 0.2);
+      color: var(--text);
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    .modal textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Raleway', sans-serif;
+      font-size: 15px;
+      resize: vertical;
+      margin-bottom: 20px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .modal textarea:focus { border-color: var(--primary); }
+    .modal textarea::placeholder { color: var(--text-muted); }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Raleway', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+    .btn-cancel {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    .btn-cancel:hover { border-color: var(--text-muted); color: var(--text); }
+    .btn-confirm {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-confirm:hover { background: var(--primary-light); }
+
+    /* ─── Confirm Delete ─── */
+    .confirm-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+    }
+    .confirm-overlay.active { display: flex; }
+    .confirm-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      text-align: center;
+      max-width: 320px;
+      width: 90%;
+      animation: fadeIn 0.2s;
+    }
+    .confirm-box p {
+      margin-bottom: 20px;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    .confirm-box .modal-actions { justify-content: center; }
+    .btn-delete {
+      background: var(--danger);
+      color: white;
+    }
+    .btn-delete:hover { background: #e74c3c; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <h1><span>D</span>ieta</h1>
+  </header>
+
+  <!-- Counter -->
+  <section class="counter-section">
+    <div class="counter-label">Flexibilidades esta semana</div>
+    <div class="counter-value ok" id="counter">0 <small>/ 5</small></div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+    </div>
+    <div class="week-warning" id="weekWarning">⚠ Meta semanal ultrapassada</div>
+  </section>
+
+  <div class="divider">✦ ─────── ✦ ─────── ✦</div>
+
+  <!-- Current Week Cards -->
+  <div class="section-title">Esta Semana</div>
+  <div class="cards-container" id="currentWeekCards">
+    <div class="empty-state" id="emptyState">
+      <div class="icon">☽</div>
+      <p>Nenhuma flexibilidade registrada</p>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="divider">✦ ─────── ✦ ─────── ✦</div>
+  <div class="section-title">Histórico</div>
+  <div class="history-section" id="historySection">
+    <div class="empty-state" id="historyEmpty">
+      <p style="font-size: 13px;">Sem histórico ainda</p>
+    </div>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" id="fabBtn" aria-label="Adicionar flexibilidade">+</button>
+
+  <!-- Add/Edit Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-title" id="modalTitle">Nova Flexibilidade</div>
+      <div class="size-selector" id="sizeSelector">
+        <button class="size-btn" data-size="small">
+          <span class="size-icon">🔸</span>
+          Pequena
+        </button>
+        <button class="size-btn" data-size="medium">
+          <span class="size-icon">🔶</span>
+          Média
+        </button>
+        <button class="size-btn" data-size="large">
+          <span class="size-icon">🔷</span>
+          Grande
+        </button>
+      </div>
+      <textarea id="flexDesc" placeholder="Descreva a flexibilidade..." maxlength="200"></textarea>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" id="btnCancel">Cancelar</button>
+        <button class="btn btn-confirm" id="btnConfirm">Salvar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm Delete -->
+  <div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+      <p>Deseja remover esta flexibilidade?</p>
+      <div class="modal-actions">
+        <button class="btn btn-cancel" id="btnConfirmCancel">Não</button>
+        <button class="btn btn-delete" id="btnConfirmDelete">Remover</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─── Config ───
+    const CONFIG = {
+      maxPerWeek: 5,
+      weights: { small: 1, medium: 1, large: 1 },
+      storageKey: 'dieta_flexibilidades'
+    };
+
+    // ─── State ───
+    let flexes = JSON.parse(localStorage.getItem(CONFIG.storageKey) || '[]');
+    let editingId = null;
+    let deletingId = null;
+    let selectedSize = null;
+
+    // ─── Utils ───
+    function generateId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    }
+
+    function getWeekId(date) {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(d.setDate(diff));
+      monday.setHours(0, 0, 0, 0);
+      const yearStart = new Date(monday.getFullYear(), 0, 1);
+      const weekNum = Math.ceil(((monday - yearStart) / 86400000 + yearStart.getDay() + 1) / 7);
+      return `${monday.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+    }
+
+    function getCurrentWeekId() {
+      return getWeekId(new Date());
+    }
+
+    function getWeekLabel(weekId) {
+      const match = weekId.match(/(\d{4})-W(\d{2})/);
+      if (!match) return weekId;
+      return `Semana ${parseInt(match[2])} — ${match[1]}`;
+    }
+
+    function getWeekUsed(weekFlexes) {
+      return weekFlexes.reduce((sum, f) => sum + (CONFIG.weights[f.size] || 1), 0);
+    }
+
+    function formatDate(dateStr) {
+      const d = new Date(dateStr);
+      const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      const day = days[d.getDay()];
+      return `${day}, ${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+    }
+
+    function sizeLabel(size) {
+      const labels = { small: 'Pequena', medium: 'Média', large: 'Grande' };
+      return labels[size] || size;
+    }
+
+    function save() {
+      localStorage.setItem(CONFIG.storageKey, JSON.stringify(flexes));
+    }
+
+    // ─── Render ───
+    function render() {
+      const currentWeek = getCurrentWeekId();
+      const weekFlexes = flexes.filter(f => f.weekId === currentWeek);
+      const used = getWeekUsed(weekFlexes);
+      const max = CONFIG.maxPerWeek;
+      const overLimit = used > max;
+
+      // Counter
+      const counter = document.getElementById('counter');
+      counter.innerHTML = `${used} <small>/ ${max}</small>`;
+      counter.className = 'counter-value ' + (overLimit ? 'warn' : 'ok');
+
+      // Progress bar
+      const fill = document.getElementById('progressFill');
+      const pct = Math.min((used / max) * 100, 100);
+      fill.style.width = pct + '%';
+      fill.className = 'progress-fill' + (overLimit ? ' warn' : '');
+
+      // Warning
+      const warning = document.getElementById('weekWarning');
+      warning.className = 'week-warning' + (overLimit ? ' visible' : '');
+
+      // Current week cards
+      const container = document.getElementById('currentWeekCards');
+      const emptyState = document.getElementById('emptyState');
+
+      container.querySelectorAll('.flex-card').forEach(el => el.remove());
+
+      if (weekFlexes.length === 0) {
+        emptyState.style.display = 'block';
+      } else {
+        emptyState.style.display = 'none';
+        const sorted = [...weekFlexes].sort((a, b) => new Date(b.date) - new Date(a.date));
+        sorted.forEach(flex => {
+          const card = document.createElement('div');
+          card.className = 'flex-card';
+          card.innerHTML = `
+            <div class="flex-card-header">
+              <span class="flex-badge ${flex.size}">${sizeLabel(flex.size)}</span>
+              <div class="flex-card-actions">
+                <button class="edit" onclick="startEdit('${flex.id}')" aria-label="Editar">✏️</button>
+                <button class="delete" onclick="startDelete('${flex.id}')" aria-label="Deletar">🗑️</button>
+              </div>
+            </div>
+            ${flex.description ? `<div class="flex-card-desc">${escapeHtml(flex.description)}</div>` : ''}
+            <div class="flex-card-date">${formatDate(flex.date)}</div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      // History
+      renderHistory(currentWeek);
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function renderHistory(currentWeek) {
+      const section = document.getElementById('historySection');
+      const emptyEl = document.getElementById('historyEmpty');
+
+      section.querySelectorAll('.history-week').forEach(el => el.remove());
+
+      const weeks = {};
+      flexes.forEach(f => {
+        if (f.weekId !== currentWeek) {
+          if (!weeks[f.weekId]) weeks[f.weekId] = [];
+          weeks[f.weekId].push(f);
+        }
+      });
+
+      const sortedWeeks = Object.keys(weeks).sort().reverse();
+
+      if (sortedWeeks.length === 0) {
+        emptyEl.style.display = 'block';
+        return;
+      }
+      emptyEl.style.display = 'none';
+
+      sortedWeeks.forEach(weekId => {
+        const weekFlexes = weeks[weekId];
+        const used = getWeekUsed(weekFlexes);
+        const el = document.createElement('div');
+        el.className = 'history-week';
+        el.innerHTML = `
+          <div class="history-week-header" onclick="this.parentElement.classList.toggle('open')">
+            <span class="week-name">${getWeekLabel(weekId)}</span>
+            <span class="week-count">${used}/${CONFIG.maxPerWeek}</span>
+            <span class="chevron">▼</span>
+          </div>
+          <div class="history-week-body">
+            ${weekFlexes.sort((a, b) => new Date(b.date) - new Date(a.date)).map(f => `
+              <div class="history-item">
+                <span class="dot ${f.size}"></span>
+                <div>
+                  <strong>${sizeLabel(f.size)}</strong>
+                  ${f.description ? ' — ' + escapeHtml(f.description) : ''}
+                  <div style="color: var(--text-muted); font-size: 11px; margin-top: 2px;">${formatDate(f.date)}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        section.appendChild(el);
+      });
+    }
+
+    // ─── Modal ───
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalTitle = document.getElementById('modalTitle');
+    const flexDesc = document.getElementById('flexDesc');
+    const fabBtn = document.getElementById('fabBtn');
+    const btnCancel = document.getElementById('btnCancel');
+    const btnConfirm = document.getElementById('btnConfirm');
+    const sizeBtns = document.querySelectorAll('.size-btn');
+
+    function openModal(isEdit) {
+      modalTitle.textContent = isEdit ? 'Editar Flexibilidade' : 'Nova Flexibilidade';
+      modalOverlay.classList.add('active');
+      setTimeout(() => flexDesc.focus(), 300);
+    }
+
+    function closeModal() {
+      modalOverlay.classList.remove('active');
+      editingId = null;
+      selectedSize = null;
+      flexDesc.value = '';
+      sizeBtns.forEach(b => b.classList.remove('selected'));
+    }
+
+    fabBtn.addEventListener('click', () => {
+      editingId = null;
+      selectedSize = null;
+      flexDesc.value = '';
+      sizeBtns.forEach(b => b.classList.remove('selected'));
+      openModal(false);
+    });
+
+    sizeBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        sizeBtns.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedSize = btn.dataset.size;
+      });
+    });
+
+    btnCancel.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) closeModal();
+    });
+
+    btnConfirm.addEventListener('click', () => {
+      if (!selectedSize) {
+        sizeBtns.forEach(b => {
+          b.style.borderColor = 'var(--danger)';
+          setTimeout(() => b.style.borderColor = '', 600);
+        });
+        return;
+      }
+
+      if (editingId) {
+        const flex = flexes.find(f => f.id === editingId);
+        if (flex) {
+          flex.size = selectedSize;
+          flex.description = flexDesc.value.trim();
+        }
+      } else {
+        flexes.push({
+          id: generateId(),
+          date: new Date().toISOString(),
+          size: selectedSize,
+          description: flexDesc.value.trim(),
+          weekId: getCurrentWeekId()
+        });
+      }
+
+      save();
+      closeModal();
+      render();
+    });
+
+    // ─── Edit ───
+    window.startEdit = function(id) {
+      const flex = flexes.find(f => f.id === id);
+      if (!flex) return;
+      editingId = id;
+      selectedSize = flex.size;
+      flexDesc.value = flex.description || '';
+      sizeBtns.forEach(b => {
+        b.classList.toggle('selected', b.dataset.size === flex.size);
+      });
+      openModal(true);
+    };
+
+    // ─── Delete ───
+    const confirmOverlay = document.getElementById('confirmOverlay');
+    const btnConfirmCancel = document.getElementById('btnConfirmCancel');
+    const btnConfirmDelete = document.getElementById('btnConfirmDelete');
+
+    window.startDelete = function(id) {
+      deletingId = id;
+      confirmOverlay.classList.add('active');
+    };
+
+    btnConfirmCancel.addEventListener('click', () => {
+      deletingId = null;
+      confirmOverlay.classList.remove('active');
+    });
+
+    confirmOverlay.addEventListener('click', (e) => {
+      if (e.target === confirmOverlay) {
+        deletingId = null;
+        confirmOverlay.classList.remove('active');
+      }
+    });
+
+    btnConfirmDelete.addEventListener('click', () => {
+      if (deletingId) {
+        flexes = flexes.filter(f => f.id !== deletingId);
+        save();
+        render();
+      }
+      deletingId = null;
+      confirmOverlay.classList.remove('active');
+    });
+
+    // ─── PWA ───
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js');
+    }
+
+    // ─── Init ───
+    render();
+  </script>
+</body>
+</html>
